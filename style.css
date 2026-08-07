@@ -691,6 +691,7 @@ img{
   .nav{
     min-height:62px;
     align-items:flex-end;
+    gap:0.8rem;
   }
 
   .logo{
@@ -698,17 +699,18 @@ img{
   }
 
   .nav-links{
-    gap:1rem;
+    gap:0.82rem;
+    justify-content:flex-end;
   }
 
   .nav-links a{
-    font-size:0.78rem;
+    font-size:0.72rem;
     padding-bottom:0.8rem;
   }
 
   .hero{
-    min-height:62vh;
-    padding:2.8rem 0 1.5rem;
+    min-height:auto;
+    padding:2.45rem 0 1.45rem;
   }
 
   .hero::after{
@@ -720,18 +722,17 @@ img{
   }
 
   .hero-content{
-    grid-template-columns:minmax(190px, 0.58fr) minmax(220px, 0.82fr);
-    gap:0;
-    min-width:620px;
-    transform:translateX(-4%);
-  }
-
-  .hero .container{
-    overflow:hidden;
+    grid-template-columns:1fr;
+    gap:1.15rem;
+    min-width:0;
+    transform:none;
   }
 
   .hero-copy{
-    padding-left:0.8rem;
+    position:relative;
+    z-index:2;
+    max-width:100%;
+    padding-left:0.85rem;
   }
 
   .hero-kicker{
@@ -740,15 +741,15 @@ img{
   }
 
   .hero-content h1{
-    font-size:2.45rem;
+    font-size:clamp(2.25rem,10vw,3.15rem);
     letter-spacing:0.02em;
-    margin-bottom:0.9rem;
+    margin-bottom:0.8rem;
   }
 
   .hero-content h2{
-    max-width:230px;
-    font-size:0.78rem;
-    line-height:1.65;
+    max-width:310px;
+    font-size:clamp(0.82rem,3.45vw,1rem);
+    line-height:1.58;
   }
 
   .hero-mark{
@@ -766,7 +767,9 @@ img{
   }
 
   .hero-panel{
-    min-height:260px;
+    min-height:230px;
+    width:100%;
+    margin-right:0;
   }
 
   .panel-topline{
@@ -832,19 +835,30 @@ img{
 
 @media (max-width: 420px){
   .nav-links{
-    gap:0.7rem;
+    gap:0.55rem;
   }
 
   .nav-links a{
-    font-size:0.72rem;
+    font-size:0.66rem;
   }
 
   .hero-content{
-    min-width:580px;
-    transform:translateX(-7%);
+    grid-template-columns:1fr;
+    min-width:0;
+    transform:none;
   }
 
   .hero-content h1{
-    font-size:2.2rem;
+    font-size:clamp(2rem,10vw,2.65rem);
+  }
+
+  .hero-content h2{
+    max-width:290px;
+    font-size:0.78rem;
+  }
+
+  .hero-panel{
+    min-height:215px;
+    margin-right:0;
   }
 }

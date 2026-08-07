@@ -40,7 +40,7 @@ function setupArtGallery() {
   if (!gallery) return
 
   const extensions = ["jpg", "jpeg", "png", "webp", "svg", "gif"]
-  const maxArtworkCount = 60
+  const maxArtworkCount = 18
 
   for (let index = 7; index <= maxArtworkCount; index++) {
     loadArtwork(index, 0)
