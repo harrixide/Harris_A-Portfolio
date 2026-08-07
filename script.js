@@ -1,9 +1,7 @@
-console.log("PORTFOLIO SCRIPT RUNNING")
-
 document.addEventListener("DOMContentLoaded", () => {
   setupSmoothScroll()
-  setupProjectCardHover()
   setFooterYear()
+  setupArtGallery()
   initLorenzAttractor()
   setupDemoButtons()
   setupImageFallbacks()
@@ -29,27 +27,55 @@ function setupSmoothScroll() {
   })
 }
 
-function setupProjectCardHover() {
-  const cards = document.querySelectorAll(".project-card")
-
-  cards.forEach(card => {
-    card.addEventListener("mouseenter", () => {
-      card.style.transform = "translateY(-6px) scale(1.02)"
-      card.style.boxShadow = "0 18px 40px rgba(0,0,0,0.28)"
-    })
-
-    card.addEventListener("mouseleave", () => {
-      card.style.transform = "translateY(0) scale(1)"
-      card.style.boxShadow = "none"
-    })
-  })
-}
-
 function setFooterYear() {
   const yearElement = document.getElementById("year")
 
   if (yearElement) {
     yearElement.textContent = new Date().getFullYear()
+  }
+}
+
+function setupArtGallery() {
+  const gallery = document.getElementById("art-gallery")
+  if (!gallery) return
+
+  const extensions = ["jpg", "jpeg", "png", "webp", "svg", "gif"]
+  const maxArtworkCount = 60
+
+  for (let index = 7; index <= maxArtworkCount; index++) {
+    loadArtwork(index, 0)
+  }
+
+  function loadArtwork(index, extensionIndex) {
+    if (extensionIndex >= extensions.length) return
+
+    const extension = extensions[extensionIndex]
+    const src = `art/art${index}.${extension}`
+    const image = new Image()
+
+    image.onload = () => {
+      addArtwork(src, index)
+    }
+
+    image.onerror = () => {
+      loadArtwork(index, extensionIndex + 1)
+    }
+
+    image.src = src
+  }
+
+  function addArtwork(src, index) {
+    const figure = document.createElement("figure")
+    const image = document.createElement("img")
+
+    figure.className = "art-card"
+    figure.style.order = index
+    image.src = src
+    image.alt = `Spray paint artwork ${index}`
+    image.loading = "lazy"
+
+    figure.appendChild(image)
+    gallery.appendChild(figure)
   }
 }
 
@@ -158,11 +184,12 @@ function initLorenzAttractor() {
   const sigma = 10
   const rho = 28
   const beta = 8 / 3
-  const dt = 0.005
-  const scale = 14
+  const dt = 0.0048
+  let scale = 15
 
   const state1 = { x: 0.1, y: 0, z: 0 }
   const state2 = { x: 0.1001, y: 0, z: 0 }
+  const state3 = { x: 0.098, y: 0, z: 0 }
 
   let angle = 0
 
@@ -182,40 +209,46 @@ function initLorenzAttractor() {
 
     const rx = px * cos - py * sin
     const rz = px * sin + py * cos
+    const heroAnchorX = width < 760 ? width * 0.64 : width * 0.74
+    const heroAnchorY = width < 760 ? height * 0.34 : height * 0.25
+    scale = width < 760 ? 10.5 : 17.5
 
     return {
-      x: width / 2 + rx * scale,
-      y: height / 2 - 55 + pz * scale * 0.95 + rz * 0.12
+      x: heroAnchorX + rx * scale,
+      y: heroAnchorY + pz * scale * 0.9 + rz * 0.1
     }
   }
 
-  function drawPoint(px, py, color) {
-    const glow = ctx.createRadialGradient(px, py, 0, px, py, 6)
+  function drawPoint(px, py, radius, color) {
+    const glow = ctx.createRadialGradient(px, py, 0, px, py, radius)
 
     glow.addColorStop(0, color)
     glow.addColorStop(1, "rgba(0,0,0,0)")
 
     ctx.fillStyle = glow
     ctx.beginPath()
-    ctx.arc(px, py, 6, 0, Math.PI * 2)
+    ctx.arc(px, py, radius, 0, Math.PI * 2)
     ctx.fill()
   }
 
   function animate() {
     angle += 0.001
 
-    ctx.fillStyle = "rgba(11,15,20,0.08)"
+    ctx.fillStyle = "rgba(5,5,7,0.075)"
     ctx.fillRect(0, 0, width, height)
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 19; i++) {
       stepLorenz(state1)
       stepLorenz(state2)
+      stepLorenz(state3)
 
       const p1 = project(state1.x, state1.y, state1.z)
       const p2 = project(state2.x, state2.y, state2.z)
+      const p3 = project(state3.x, state3.y, state3.z)
 
-      drawPoint(p1.x, p1.y, "rgba(120,180,255,0.9)")
-      drawPoint(p2.x, p2.y, "rgba(255,120,200,0.9)")
+      drawPoint(p1.x, p1.y, 5.8, "rgba(0,184,169,0.9)")
+      drawPoint(p2.x, p2.y, 4.8, "rgba(255,46,166,0.74)")
+      drawPoint(p3.x, p3.y, 4.1, "rgba(255,59,48,0.62)")
     }
 
     requestAnimationFrame(animate)

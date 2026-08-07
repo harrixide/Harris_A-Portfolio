@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Harris | Data Science + Visual Art</title>
-  <meta name="description" content="Portfolio of Harris. Data science student exploring machine learning, chaos systems, and visual art.">
+  <title>Harris_A Portfolio | Data Science + Visual Art</title>
+  <meta name="description" content="Harris_A Portfolio. Data science, visual systems, machine learning, chaos systems, and spray paint art.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -16,7 +16,7 @@
 
   <header class="site-header" id="top">
     <nav class="nav container">
-      <a class="logo" href="#top">Harris</a>
+      <a class="logo" href="#top">HA</a>
 
       <ul class="nav-links">
         <li><a href="#projects">Projects</a></li>
@@ -33,18 +33,53 @@
       <canvas id="chaos-bg"></canvas>
 
       <div class="container hero-content fade-in">
-        <h1>Welcome</h1>
+        <div class="hero-copy">
+          <h1>Harris Aslam</h1>
 
-        <h2>Data Science Student and Visual Artist</h2>
+          <h2>Data science, visual systems, and spray paint work.</h2>
 
-        <p class="hero-intro">
-          I build projects that combine machine learning, mathematical systems, and visual storytelling. My work explores how structure and creativity intersect.
-        </p>
+          <p class="hero-intro">
+            I build recommendation systems, nonlinear simulations, and image-based projects with an artist's eye for structure, motion, and texture.
+          </p>
 
-        <div class="hero-buttons">
-          <a class="btn primary" href="#projects">View Projects</a>
-          <a class="btn secondary" href="#gallery">View Art</a>
+          <div class="hero-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+          </div>
+
+          <div class="hero-buttons">
+            <a class="btn primary" href="#projects">View Projects</a>
+            <a class="btn secondary" href="#gallery">View Art</a>
+          </div>
         </div>
+
+        <aside class="hero-panel" aria-label="Portfolio snapshot">
+          <div class="panel-topline">
+            <span>live system</span>
+            <span>chaos field</span>
+          </div>
+
+          <div class="panel-orbit">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <div class="panel-grid">
+            <div>
+              <span class="panel-number">03</span>
+              <span class="panel-label">Projects</span>
+            </div>
+            <div>
+              <span class="panel-number">06</span>
+              <span class="panel-label">Artworks</span>
+            </div>
+            <div>
+              <span class="panel-number">ML</span>
+              <span class="panel-label">Systems</span>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -202,7 +237,7 @@
             A selection of six spray paint pieces exploring atmosphere, motion, and texture.
           </p>
 
-          <div class="gallery-grid">
+          <div class="gallery-grid" id="art-gallery" aria-live="polite">
             <figure class="art-card"><img src="art/art1.jpg" alt="Spray paint artwork 1"></figure>
             <figure class="art-card"><img src="art/art2.jpg" alt="Spray paint artwork 2"></figure>
             <figure class="art-card"><img src="art/art3.svg" alt="Spray paint artwork 3"></figure>
