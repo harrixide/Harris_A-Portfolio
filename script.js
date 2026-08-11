@@ -42,7 +42,7 @@ function setupArtGallery() {
   const extensions = ["jpg", "jpeg", "png", "webp", "svg", "gif"]
   const maxArtworkCount = 18
 
-  for (let index = 7; index <= maxArtworkCount; index++) {
+  for (let index = 1; index <= maxArtworkCount; index++) {
     loadArtwork(index, 0)
   }
 
@@ -65,17 +65,21 @@ function setupArtGallery() {
   }
 
   function addArtwork(src, index) {
-    const figure = document.createElement("figure")
-    const image = document.createElement("img")
+    const existingFigure = gallery.querySelector(`[data-art-index="${index}"]`)
+    const figure = existingFigure || document.createElement("figure")
+    const image = existingFigure?.querySelector("img") || document.createElement("img")
 
     figure.className = "art-card"
+    figure.dataset.artIndex = index
     figure.style.order = index
     image.src = src
     image.alt = `Spray paint artwork ${index}`
     image.loading = "lazy"
 
-    figure.appendChild(image)
-    gallery.appendChild(figure)
+    if (!existingFigure) {
+      figure.appendChild(image)
+      gallery.appendChild(figure)
+    }
   }
 }
 
