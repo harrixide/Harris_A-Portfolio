@@ -3,45 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unique Music Recommendations | Harris</title>
+  <title>Unique Music Recommendations | Harris_A Portfolio</title>
   <meta name="description" content="Interactive music recommender using audio similarity, distinctive local matches, and musical journey analysis.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="recommender.css">
   <style>
     .search-mode-row { display:flex; flex-wrap:wrap; gap:.65rem; margin-bottom:1.2rem; }
-    .search-mode { padding:.75rem 1rem; border:1px solid var(--border); border-radius:999px; color:var(--text); background:rgba(255,255,255,.05); cursor:pointer; }
-    .search-mode.active { color:#08111d; background:var(--accent); font-weight:700; }
+    .search-mode { min-height:40px; padding:.68rem .9rem; border:1px solid var(--border); border-radius:2px; color:var(--text); background:rgba(242,238,231,.04); cursor:pointer; }
+    .search-mode.active { color:#021010; background:var(--teal); border-color:var(--teal); font-weight:800; }
     .search-mode-note, .trajectory-method-note { margin:.75rem 0 0; color:var(--muted); }
-    .trajectory-method-note { padding:.8rem 1rem; border:1px dashed var(--border); border-radius:.8rem; }
+    .trajectory-method-note { padding:.8rem 1rem; border:1px dashed var(--border); border-radius:2px; }
     .method-tab:disabled { opacity:.42; cursor:not-allowed; }
 
-    .method-visual { margin:1.25rem 0 1.5rem; padding:1rem; border:1px solid var(--border); border-radius:1rem; background:rgba(255,255,255,.035); }
+    .method-visual { margin:1.25rem 0 1.5rem; padding:1rem; border:1px solid var(--border); border-radius:2px; background:rgba(242,238,231,.035); }
     .method-visual-copy { margin-bottom:.9rem; }
     .method-visual-copy h3 { margin:0 0 .35rem; font-size:1.15rem; }
     .method-visual-copy p { margin:0; color:var(--muted); line-height:1.55; }
-    .method-visual-frame { overflow:hidden; border-radius:.8rem; background:#0b1020; border:1px solid rgba(255,255,255,.08); }
-    .method-graphic { display:none; color:#e5e7eb; background:linear-gradient(145deg,#0f172a,#111827); }
+    .method-visual-frame { overflow:hidden; border-radius:2px; background:#030404; border:1px solid var(--border); }
+    .method-graphic { display:none; color:var(--text); background:linear-gradient(145deg,#050606,#10070d); }
 
     .audio-similarity-graphic { padding:2rem; min-height:330px; }
     .audio-bars { display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; align-items:end; height:210px; margin-top:1.25rem; }
     .audio-bar-group { display:flex; justify-content:center; align-items:flex-end; gap:.35rem; height:100%; }
-    .audio-bar { width:28%; min-width:18px; border-radius:.45rem .45rem 0 0; }
-    .audio-bar.selected { background:#38bdf8; }
-    .audio-bar.match { background:#c084fc; }
-    .audio-labels { display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; margin-top:.65rem; text-align:center; color:#cbd5e1; font-size:.82rem; }
-    .audio-legend { display:flex; flex-wrap:wrap; gap:1rem; margin-top:1.25rem; color:#cbd5e1; }
+    .audio-bar { width:28%; min-width:18px; border-radius:2px 2px 0 0; }
+    .audio-bar.selected { background:var(--teal); box-shadow:0 0 18px rgba(0,184,169,.38); }
+    .audio-bar.match { background:var(--magenta); box-shadow:0 0 18px rgba(255,46,166,.3); }
+    .audio-labels { display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; margin-top:.65rem; text-align:center; color:var(--muted); font-size:.82rem; }
+    .audio-legend { display:flex; flex-wrap:wrap; gap:1rem; margin-top:1.25rem; color:var(--muted); }
     .legend-dot { width:.75rem; height:.75rem; border-radius:50%; display:inline-block; margin-right:.4rem; }
 
     .svg-explainer { padding:.85rem; }
     .svg-explainer svg { display:block; width:100%; height:auto; max-height:500px; }
-    .svg-title { font:700 26px Inter,sans-serif; fill:#f8fafc; }
-    .svg-subtitle { font:500 13px Inter,sans-serif; fill:#aab4c8; }
-    .svg-label { font:600 13px Inter,sans-serif; fill:#e5e7eb; }
-    .svg-small { font:500 11px Inter,sans-serif; fill:#b6c0d1; }
-    .svg-axis { stroke:#6b7280; stroke-width:1.5; }
-    .svg-grid { stroke:#334155; stroke-width:1; opacity:.48; }
+    .svg-title { font:700 26px "Space Mono",monospace; fill:#f2eee7; }
+    .svg-subtitle { font:500 13px Inter,sans-serif; fill:#b7b0a8; }
+    .svg-label { font:600 13px Inter,sans-serif; fill:#f2eee7; }
+    .svg-small { font:500 11px Inter,sans-serif; fill:#b7b0a8; }
+    .svg-axis { stroke:#7b7770; stroke-width:1.5; }
+    .svg-grid { stroke:#1b4f4d; stroke-width:1; opacity:.48; }
 
     @media (max-width:650px) {
       .method-visual { padding:.7rem; }
@@ -55,7 +55,7 @@
 <body>
   <header class="rec-header">
     <div class="rec-container rec-nav">
-      <a class="brand" href="../index.html">Harris</a>
+      <a class="brand" href="../index.html">HA</a>
       <a class="back-link" href="../index.html">Back to Portfolio</a>
     </div>
   </header>
