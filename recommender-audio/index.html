@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio-Ready Music Recommendations | Harris_A Portfolio</title>
+  <meta name="description" content="Audio-ready version of the interactive music recommender using only songs with connected audio files.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="recommender.css">
+  <style>
+    .search-mode-row { display:flex; flex-wrap:wrap; gap:.65rem; margin-bottom:1.2rem; }
+    .search-mode { min-height:40px; padding:.68rem .9rem; border:1px solid var(--border); border-radius:2px; color:var(--text); background:rgba(242,238,231,.04); cursor:pointer; }
+    .search-mode.active { color:#021010; background:var(--teal); border-color:var(--teal); font-weight:800; }
+    .search-mode-note, .trajectory-method-note { margin:.75rem 0 0; color:var(--muted); }
+    .trajectory-method-note { padding:.8rem 1rem; border:1px dashed var(--border); border-radius:2px; }
+    .method-tab:disabled { opacity:.42; cursor:not-allowed; }
+
+    .method-visual { margin:1.25rem 0 1.5rem; padding:1rem; border:1px solid var(--border); border-radius:2px; background:rgba(242,238,231,.035); }
+    .method-visual-copy { margin-bottom:.9rem; }
+    .method-visual-copy h3 { margin:0 0 .35rem; font-size:1.15rem; }
+    .method-visual-copy p { margin:0; color:var(--muted); line-height:1.55; }
+    .method-visual-frame { overflow:hidden; border-radius:2px; background:#030404; border:1px solid var(--border); }
+    .method-graphic { display:none; color:var(--text); background:linear-gradient(145deg,#050606,#10070d); }
+
+    .audio-similarity-graphic { padding:2rem; min-height:330px; }
+    .audio-bars { display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; align-items:end; height:210px; margin-top:1.25rem; }
+    .audio-bar-group { display:flex; justify-content:center; align-items:flex-end; gap:.35rem; height:100%; }
+    .audio-bar { width:28%; min-width:18px; border-radius:2px 2px 0 0; }
+    .audio-bar.selected { background:var(--teal); box-shadow:0 0 18px rgba(0,184,169,.38); }
+    .audio-bar.match { background:var(--magenta); box-shadow:0 0 18px rgba(255,46,166,.3); }
+    .audio-labels { display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; margin-top:.65rem; text-align:center; color:var(--muted); font-size:.82rem; }
+    .audio-legend { display:flex; flex-wrap:wrap; gap:1rem; margin-top:1.25rem; color:var(--muted); }
+    .legend-dot { width:.75rem; height:.75rem; border-radius:50%; display:inline-block; margin-right:.4rem; }
+
+    .svg-explainer { padding:.85rem; }
+    .svg-explainer svg { display:block; width:100%; height:auto; max-height:500px; }
+    .svg-title { font:700 26px "Space Mono",monospace; fill:#f2eee7; }
+    .svg-subtitle { font:500 13px Inter,sans-serif; fill:#b7b0a8; }
+    .svg-label { font:600 13px Inter,sans-serif; fill:#f2eee7; }
+    .svg-small { font:500 11px Inter,sans-serif; fill:#b7b0a8; }
+    .svg-axis { stroke:#7b7770; stroke-width:1.5; }
+    .svg-grid { stroke:#1b4f4d; stroke-width:1; opacity:.48; }
+
+    @media (max-width:650px) {
+      .method-visual { padding:.7rem; }
+      .audio-similarity-graphic { padding:1rem; min-height:280px; }
+      .audio-bars { gap:.4rem; }
+      .audio-labels { gap:.3rem; font-size:.65rem; }
+      .svg-explainer { padding:.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="rec-header">
+    <div class="rec-container rec-nav">
+      <a class="brand" href="../index.html">HA</a>
+      <a class="back-link" href="../index.html">Back to Portfolio</a>
+    </div>
+  </header>
+
+  <main class="rec-container">
+    <section class="intro">
+      <p class="eyebrow">Audio-Ready Project</p>
+      <h1>Audio-Ready Music Recommendations</h1>
+      <p>Search the smaller catalog where every selected song and recommendation has a matching audio file ready to connect.</p>
+    </section>
+
+    <section class="search-panel">
+      <label>Search method</label>
+      <div class="search-mode-row">
+        <button class="search-mode active" type="button" data-search-mode="all">Audio-ready songs</button>
+        <button class="search-mode" type="button" data-search-mode="trajectory">Songs with Musical Journey Recommendations</button>
+      </div>
+      <label for="song-search">Search songs</label>
+      <div class="search-row">
+        <input id="song-search" type="search" placeholder="Type a song or artist" autocomplete="off">
+        <select id="song-select" aria-label="Select a song"><option value="">Loading songs...</option></select>
+      </div>
+      <p id="search-mode-note" class="search-mode-note"></p>
+      <p id="load-status" class="status" role="status"></p>
+    </section>
+
+    <section id="selected-song" class="song-panel hidden">
+      <div class="song-heading">
+        <div><p class="eyebrow">Selected Song</p><h2 id="selected-title"></h2><p id="selected-artist" class="artist"></p></div>
+        <div class="selected-actions">
+          <div id="trajectory-badge" class="trajectory-badge"></div>
+          <div id="selected-audio" class="selected-audio"></div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <article class="stat-card"><span>Musical Journey Score</span><strong id="trajectory-score">Unavailable</strong></article>
+        <article class="stat-card"><span>Tempo</span><strong id="tempo-value">Unavailable</strong></article>
+        <article class="stat-card"><span>Energy</span><strong id="energy-value">Unavailable</strong></article>
+        <article class="stat-card"><span>Danceability</span><strong id="danceability-value">Unavailable</strong></article>
+      </div>
+      <details class="feature-details"><summary>View all audio features</summary><div id="feature-grid" class="feature-grid"></div></details>
+    </section>
+
+    <section id="recommendation-section" class="recommendation-panel hidden">
+      <div class="section-title-row"><div><p class="eyebrow">Recommendations</p><h2>Choose a method</h2></div></div>
+      <div class="method-tabs" role="tablist" aria-label="Recommendation method">
+        <button class="method-tab active" type="button" data-method="cosine">Audio Similarity</button>
+        <button class="method-tab" type="button" data-method="unique">Familiar with a Twist</button>
+        <button class="method-tab" type="button" data-method="trajectory">Similar Musical Journey</button>
+      </div>
+      <p id="trajectory-method-note" class="trajectory-method-note hidden"></p>
+      <p id="method-description" class="method-description"></p>
+
+      <section id="method-visual" class="method-visual" aria-live="polite">
+        <div class="method-visual-copy">
+          <h3 id="method-visual-title"></h3>
+          <p id="method-visual-caption"></p>
+        </div>
+        <div class="method-visual-frame">
+          <div id="audio-similarity-graphic" class="method-graphic audio-similarity-graphic">
+            <h3>Comparing Audio Feature Profiles</h3>
+            <p>Similar songs have feature values that follow closely related patterns.</p>
+            <div class="audio-bars">
+              <div class="audio-bar-group"><span class="audio-bar selected" style="height:82%"></span><span class="audio-bar match" style="height:76%"></span></div>
+              <div class="audio-bar-group"><span class="audio-bar selected" style="height:68%"></span><span class="audio-bar match" style="height:64%"></span></div>
+              <div class="audio-bar-group"><span class="audio-bar selected" style="height:75%"></span><span class="audio-bar match" style="height:71%"></span></div>
+              <div class="audio-bar-group"><span class="audio-bar selected" style="height:34%"></span><span class="audio-bar match" style="height:39%"></span></div>
+              <div class="audio-bar-group"><span class="audio-bar selected" style="height:61%"></span><span class="audio-bar match" style="height:57%"></span></div>
+            </div>
+            <div class="audio-labels"><span>Tempo</span><span>Energy</span><span>Danceability</span><span>Acousticness</span><span>Happiness</span></div>
+            <div class="audio-legend"><span><i class="legend-dot" style="background:#38bdf8"></i>Selected song</span><span><i class="legend-dot" style="background:#c084fc"></i>Similar recommendation</span></div>
+          </div>
+
+          <div id="unique-graphic" class="method-graphic svg-explainer">
+            <svg viewBox="0 0 760 500" role="img" aria-labelledby="uniqueSvgTitle uniqueSvgDesc">
+              <title id="uniqueSvgTitle">Familiar with a Twist recommendation example</title>
+              <desc id="uniqueSvgDesc">A one-quadrant scatter plot of all songs. Ten equal red circles form a local cluster of the most similar sounding songs. A dashed yellow arrow points to the red point furthest toward the top right.</desc>
+              <defs>
+                <marker id="uniqueArrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#fbbf24"/></marker>
+                <filter id="redGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <filter id="yellowGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <rect x="0" y="0" width="760" height="500" rx="22" fill="#0d1324"/>
+              <text x="38" y="44" class="svg-title">Familiar with a Twist</text>
+              <text x="38" y="67" class="svg-subtitle">Find a similar-sounding song that is also unusually distinctive.</text>
+
+              <g transform="translate(82,92)">
+                <line x1="0" y1="270" x2="520" y2="270" class="svg-axis"/>
+                <line x1="0" y1="270" x2="0" y2="0" class="svg-axis"/>
+                <g class="svg-grid">
+                  <line x1="0" y1="216" x2="520" y2="216"/><line x1="0" y1="162" x2="520" y2="162"/><line x1="0" y1="108" x2="520" y2="108"/><line x1="0" y1="54" x2="520" y2="54"/>
+                  <line x1="104" y1="0" x2="104" y2="270"/><line x1="208" y1="0" x2="208" y2="270"/><line x1="312" y1="0" x2="312" y2="270"/><line x1="416" y1="0" x2="416" y2="270"/>
+                </g>
+                <g fill="#6b7280" opacity=".72">
+                  <circle cx="38" cy="242" r="4"/><circle cx="68" cy="220" r="4"/><circle cx="92" cy="245" r="4"/><circle cx="118" cy="201" r="4"/><circle cx="145" cy="231" r="4"/><circle cx="165" cy="186" r="4"/><circle cx="190" cy="214" r="4"/><circle cx="215" cy="174" r="4"/><circle cx="237" cy="225" r="4"/><circle cx="260" cy="145" r="4"/><circle cx="285" cy="198" r="4"/><circle cx="310" cy="130" r="4"/><circle cx="338" cy="178" r="4"/><circle cx="365" cy="110" r="4"/><circle cx="388" cy="154" r="4"/><circle cx="415" cy="88" r="4"/><circle cx="448" cy="126" r="4"/><circle cx="485" cy="65" r="4"/><circle cx="498" cy="113" r="4"/><circle cx="455" cy="196" r="4"/><circle cx="398" cy="224" r="4"/><circle cx="325" cy="240" r="4"/><circle cx="276" cy="92" r="4"/><circle cx="201" cy="106" r="4"/><circle cx="132" cy="147" r="4"/>
+                </g>
+                <g fill="#ef4444" filter="url(#redGlow)">
+                  <circle cx="278" cy="186" r="8"/><circle cx="300" cy="165" r="8"/><circle cx="315" cy="199" r="8"/><circle cx="329" cy="149" r="8"/><circle cx="344" cy="181" r="8"/>
+                  <circle cx="361" cy="158" r="8"/><circle cx="374" cy="194" r="8"/><circle cx="390" cy="169" r="8"/><circle cx="407" cy="183" r="8"/><circle cx="420" cy="132" r="8"/>
+                </g>
+                <path d="M505 50 C478 66 452 91 426 125" fill="none" stroke="#fbbf24" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#uniqueArrow)" filter="url(#yellowGlow)"/>
+                <text x="342" y="30" fill="#fbbf24" style="font:700 15px Inter,sans-serif">Recommended song</text>
+                <text x="342" y="48" class="svg-small">Furthest along both axes among</text>
+                <text x="342" y="63" class="svg-small">the 10 most similar sounding songs</text>
+                <text x="430" y="298" class="svg-small">More unique on X axis →</text>
+                <text x="-205" y="-22" class="svg-small" transform="rotate(-90)">More unique on Y axis →</text>
+              </g>
+
+              <g transform="translate(82,390)">
+                <circle cx="0" cy="0" r="6" fill="#6b7280"/><text x="14" y="4" class="svg-small">All songs</text>
+                <circle cx="130" cy="0" r="7" fill="#ef4444"/><text x="145" y="4" class="svg-small">10 most similar sounding songs</text>
+              </g>
+              <text x="82" y="432" class="svg-subtitle">Gray points represent all songs. Red points represent the 10 songs that sound most similar.</text>
+              <text x="82" y="453" class="svg-subtitle">The recommendation is the red song furthest along both axes within that local cluster.</text>
+              <text x="82" y="474" fill="#f8fafc" style="font:700 13px Inter,sans-serif">This gives you a familiar song with a unique twist.</text>
+            </svg>
+          </div>
+
+          <div id="trajectory-graphic" class="method-graphic svg-explainer">
+            <svg viewBox="0 0 760 500" role="img" aria-labelledby="journeySvgTitle journeySvgDesc">
+              <title id="journeySvgTitle">Similar Musical Journey example</title>
+              <desc id="journeySvgDesc">A three-dimensional feature-space graph showing a neon path through separated thirty-second song segments from start to finish.</desc>
+              <defs>
+                <linearGradient id="journeyLine" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#3b82f6"/><stop offset=".5" stop-color="#d946ef"/><stop offset="1" stop-color="#fb7185"/></linearGradient>
+                <filter id="journeyGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <rect x="0" y="0" width="760" height="500" rx="22" fill="#0d1324"/>
+              <text x="38" y="44" class="svg-title">Similar Musical Journey</text>
+              <text x="38" y="67" class="svg-subtitle">Follow how a song's audio changes from one 30-second segment to the next.</text>
+
+              <g transform="translate(92,104)">
+                <polygon points="45,260 470,260 575,185 150,185" fill="#111a2d" stroke="#334155" stroke-width="1.3"/>
+                <polygon points="45,260 150,185 150,38 45,112" fill="#0e1728" stroke="#334155" stroke-width="1.3"/>
+                <line x1="45" y1="260" x2="470" y2="260" class="svg-axis"/>
+                <line x1="45" y1="260" x2="150" y2="185" class="svg-axis"/>
+                <line x1="45" y1="260" x2="45" y2="112" class="svg-axis"/>
+                <line x1="470" y1="260" x2="575" y2="185" class="svg-axis"/>
+                <line x1="150" y1="185" x2="575" y2="185" class="svg-axis"/>
+                <line x1="150" y1="185" x2="150" y2="38" class="svg-axis"/>
+                <line x1="45" y1="112" x2="150" y2="38" class="svg-axis"/>
+
+                <g class="svg-grid">
+                  <line x1="130" y1="260" x2="235" y2="185"/><line x1="215" y1="260" x2="320" y2="185"/><line x1="300" y1="260" x2="405" y2="185"/><line x1="385" y1="260" x2="490" y2="185"/>
+                  <line x1="66" y1="245" x2="491" y2="245"/><line x1="87" y1="230" x2="512" y2="230"/><line x1="108" y1="215" x2="533" y2="215"/><line x1="129" y1="200" x2="554" y2="200"/>
+                  <line x1="45" y1="210" x2="150" y2="136"/><line x1="45" y1="160" x2="150" y2="86"/>
+                </g>
+
+                <g stroke="#64748b" stroke-width="1" stroke-dasharray="4 5" opacity=".65">
+                  <line x1="92" y1="228" x2="92" y2="248"/><line x1="180" y1="162" x2="180" y2="207"/><line x1="270" y1="203" x2="270" y2="221"/>
+                  <line x1="355" y1="119" x2="355" y2="204"/><line x1="450" y1="157" x2="450" y2="194"/><line x1="540" y1="72" x2="540" y2="188"/>
+                </g>
+
+                <path d="M92 228 C124 205 145 179 180 162 S235 181 270 203 S326 151 355 119 S414 131 450 157 S511 102 540 72" fill="none" stroke="url(#journeyLine)" stroke-width="7" stroke-linecap="round" filter="url(#journeyGlow)"/>
+                <g stroke="#ffffff" stroke-width="2">
+                  <circle cx="92" cy="228" r="11" fill="#3b82f6"/><circle cx="180" cy="162" r="10" fill="#6366f1"/><circle cx="270" cy="203" r="10" fill="#a855f7"/>
+                  <circle cx="355" cy="119" r="10" fill="#d946ef"/><circle cx="450" cy="157" r="10" fill="#f472b6"/><circle cx="540" cy="72" r="11" fill="#fb7185"/>
+                </g>
+                <g class="svg-label">
+                  <text x="66" y="278">Start</text><text x="69" y="294" class="svg-small">0:00</text>
+                  <text x="156" y="143">0:30</text><text x="246" y="232">1:00</text><text x="332" y="99">1:30</text><text x="426" y="181">2:00</text><text x="519" y="50">Finish</text>
+                </g>
+                <text x="404" y="286" class="svg-small">Feature dimension 1 →</text>
+                <text x="480" y="224" class="svg-small" transform="rotate(-35 480 224)">Feature dimension 2 →</text>
+                <text x="-205" y="20" class="svg-small" transform="rotate(-90)">Feature dimension 3 →</text>
+              </g>
+              <text x="92" y="446" class="svg-subtitle">Each point is a 30-second segment placed in a three-dimensional audio feature space.</text>
+              <text x="92" y="467" class="svg-subtitle">Songs are recommended when their paths change in a similar way from beginning to end.</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <div id="recommendation-list" class="recommendation-list"></div>
+    </section>
+  </main>
+  <script src="audio-config.js?v=audio-only-1"></script>
+  <script src="recommender.js?v=audio-only-1"></script>
+</body>
+</html>
