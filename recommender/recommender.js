@@ -22,11 +22,16 @@ const METHOD_VISUALS = {
   }
 }
 
+const AUDIO_BASE_URL = String(window.HARRIS_AUDIO_BASE_URL || "").replace(/\/$/, "")
+const AUDIO_EXTENSION = String(window.HARRIS_AUDIO_EXTENSION || "mp4").replace(/^\./, "")
+
 let songs = []
 let recommendations = {}
 let selectedSongId = null
 let activeMethod = "cosine"
 let searchMode = "all"
+let currentAudio = null
+let currentAudioButton = null
 
 document.addEventListener("DOMContentLoaded", init)
 
@@ -35,8 +40,8 @@ async function init() {
   renderMethodVisual()
   try {
     const [songsResponse, recommendationsResponse] = await Promise.all([
-      fetch("songs.json"),
-      fetch("recommendations.json")
+      fetch("songs.json?v=audio-2", { cache: "no-store" }),
+      fetch("recommendations.json?v=audio-2", { cache: "no-store" })
     ])
     if (!songsResponse.ok || !recommendationsResponse.ok) throw new Error("Could not load one or both JSON files.")
     songs = await songsResponse.json()
@@ -193,6 +198,7 @@ function renderSelectedSong(song) {
   document.getElementById("recommendation-section").classList.remove("hidden")
   document.getElementById("selected-title").textContent = song.song || "Unknown song"
   document.getElementById("selected-artist").textContent = song.artist || "Unknown artist"
+  renderAudioControl(document.getElementById("selected-audio"), song, "selected")
   document.getElementById("trajectory-score").textContent = formatNumber(getTrajectoryScore(song), 3)
   document.getElementById("tempo-value").textContent = formatNumber(song.features?.tempo, 1)
   document.getElementById("energy-value").textContent = formatNumber(song.features?.energy, 3)
@@ -280,7 +286,11 @@ function renderRecommendations() {
     score.className = "score"
     score.textContent = formatNumber(recommendation.score, 3)
     textWrap.append(title, artist)
-    card.append(textWrap, score)
+    const meta = document.createElement("div")
+    meta.className = "recommendation-meta"
+    meta.appendChild(score)
+    renderAudioControl(meta, song, "card")
+    card.append(textWrap, meta)
 
     const openSong = () => {
       if (searchMode === "trajectory" && !hasTrajectoryRecommendations(song)) {
@@ -302,6 +312,92 @@ function renderRecommendations() {
     })
     list.appendChild(card)
   })
+}
+
+function renderAudioControl(container, song, variant) {
+  container.innerHTML = ""
+  const button = document.createElement("button")
+  button.type = "button"
+  button.className = `audio-button ${variant === "selected" ? "audio-button-large" : ""}`
+
+  if (!song?.youtube_id) {
+    button.textContent = "No audio ID"
+    button.disabled = true
+  } else if (!AUDIO_BASE_URL) {
+    button.textContent = variant === "selected" ? "Audio storage not connected" : "No audio"
+    button.disabled = true
+    button.title = "Add your storage URL in recommender/audio-config.js after uploading the audio files."
+  } else if (song.has_audio === false) {
+    button.textContent = "No audio"
+    button.disabled = true
+    button.title = "This song does not have a matching audio file in the local download set."
+  } else {
+    button.textContent = "Play"
+    button.setAttribute("aria-label", `Play ${song.song || "song"} by ${song.artist || "unknown artist"}`)
+    button.addEventListener("click", event => {
+      event.stopPropagation()
+      toggleAudio(song, button)
+    })
+  }
+
+  container.appendChild(button)
+}
+
+function getAudioUrl(song) {
+  if (!AUDIO_BASE_URL || !song?.youtube_id) return ""
+  return `${AUDIO_BASE_URL}/${encodeURIComponent(song.youtube_id)}.${AUDIO_EXTENSION}`
+}
+
+function toggleAudio(song, button) {
+  const audioUrl = getAudioUrl(song)
+  if (!audioUrl) return
+
+  if (currentAudio && currentAudioButton === button) {
+    if (currentAudio.paused) {
+      currentAudio.play()
+      setAudioButtonState(button, "Pause", true)
+    } else {
+      currentAudio.pause()
+      setAudioButtonState(button, "Play", false)
+    }
+    return
+  }
+
+  stopAudio()
+  currentAudio = new Audio(audioUrl)
+  currentAudio.preload = "none"
+  currentAudioButton = button
+  setAudioButtonState(button, "Loading", true)
+
+  currentAudio.addEventListener("canplay", () => setAudioButtonState(button, "Pause", true), { once: true })
+  currentAudio.addEventListener("ended", stopAudio)
+  currentAudio.addEventListener("error", () => {
+    setAudioButtonState(button, "Unavailable", false)
+    button.disabled = true
+    currentAudio = null
+    currentAudioButton = null
+  })
+
+  currentAudio.play().catch(() => {
+    setAudioButtonState(button, "Play", false)
+    currentAudio = null
+    currentAudioButton = null
+  })
+}
+
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.pause()
+    currentAudio.currentTime = 0
+  }
+  if (currentAudioButton) setAudioButtonState(currentAudioButton, "Play", false)
+  currentAudio = null
+  currentAudioButton = null
+}
+
+function setAudioButtonState(button, label, active) {
+  button.textContent = label
+  button.classList.toggle("playing", active)
 }
 
 function formatNumber(value, digits) {

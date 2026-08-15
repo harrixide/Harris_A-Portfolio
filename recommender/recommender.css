@@ -234,6 +234,20 @@ a:focus-visible {
   color: var(--muted);
 }
 
+.selected-actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+}
+
+.selected-audio {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .trajectory-badge {
   flex: 0 0 auto;
   padding: 0.5rem 0.75rem;
@@ -385,11 +399,54 @@ a:focus-visible {
   font-size: 0.86rem;
 }
 
-.score {
+.recommendation-meta {
   flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+}
+
+.score {
   color: var(--red);
   font-family: "Space Mono", monospace;
   font-weight: 700;
+}
+
+.audio-button {
+  min-width: 84px;
+  min-height: 34px;
+  padding: 0.48rem 0.65rem;
+  border: 1px solid rgba(0,184,169,0.45);
+  border-radius: 2px;
+  color: var(--teal);
+  background: rgba(0,184,169,0.08);
+  font-family: "Space Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.22s ease, color 0.22s ease, background 0.22s ease;
+}
+
+.audio-button:hover {
+  border-color: var(--magenta);
+  color: var(--text);
+  background: rgba(255,46,166,0.12);
+}
+
+.audio-button.playing {
+  border-color: var(--red);
+  color: #050606;
+  background: var(--red);
+}
+
+.audio-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.audio-button-large {
+  min-width: 178px;
 }
 
 .empty-state {
@@ -450,8 +507,12 @@ a:focus-visible {
     flex-direction: column;
   }
 
-  .trajectory-badge {
+  .selected-actions,
+  .trajectory-badge,
+  .selected-audio {
     align-self: flex-start;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
 
   .stats-grid,
@@ -470,5 +531,9 @@ a:focus-visible {
 
   .recommendation-card {
     align-items: flex-start;
+  }
+
+  .recommendation-meta {
+    align-items: flex-end;
   }
 }

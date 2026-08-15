@@ -85,7 +85,10 @@
     <section id="selected-song" class="song-panel hidden">
       <div class="song-heading">
         <div><p class="eyebrow">Selected Song</p><h2 id="selected-title"></h2><p id="selected-artist" class="artist"></p></div>
-        <div id="trajectory-badge" class="trajectory-badge"></div>
+        <div class="selected-actions">
+          <div id="trajectory-badge" class="trajectory-badge"></div>
+          <div id="selected-audio" class="selected-audio"></div>
+        </div>
       </div>
       <div class="stats-grid">
         <article class="stat-card"><span>Musical Journey Score</span><strong id="trajectory-score">Unavailable</strong></article>
@@ -228,6 +231,7 @@
       <div id="recommendation-list" class="recommendation-list"></div>
     </section>
   </main>
-  <script src="recommender.js"></script>
+  <script src="audio-config.js?v=audio-2"></script>
+  <script src="recommender.js?v=audio-2"></script>
 </body>
 </html>
