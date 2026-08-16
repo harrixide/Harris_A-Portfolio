@@ -34,6 +34,7 @@ let currentAudio = null
 let currentAudioButton = null
 let currentAudioSong = null
 let isSeeking = false
+let compareAudios = []
 
 document.addEventListener("DOMContentLoaded", init)
 
@@ -336,15 +337,237 @@ function renderAudioControl(container, song, variant) {
     button.disabled = true
     button.title = "This song does not have a matching audio file in the local download set."
   } else {
-    button.textContent = "Play"
-    button.setAttribute("aria-label", `Play ${song.song || "song"} by ${song.artist || "unknown artist"}`)
+    const isCompareButton = variant === "card"
+    button.textContent = isCompareButton ? "Compare" : "Play"
+    button.setAttribute("aria-label", isCompareButton
+      ? `Compare ${song.song || "song"} by ${song.artist || "unknown artist"} with the selected song`
+      : `Play ${song.song || "song"} by ${song.artist || "unknown artist"}`)
     button.addEventListener("click", event => {
       event.stopPropagation()
-      toggleAudio(song, button)
+      if (isCompareButton) {
+        openCompareDrawer(song)
+      } else {
+        toggleAudio(song, button)
+      }
     })
   }
 
   container.appendChild(button)
+}
+
+function ensureCompareDrawer() {
+  if (document.getElementById("compare-drawer")) return
+
+  const backdrop = document.createElement("div")
+  backdrop.id = "compare-backdrop"
+  backdrop.className = "compare-backdrop hidden"
+  backdrop.addEventListener("click", closeCompareDrawer)
+
+  const drawer = document.createElement("aside")
+  drawer.id = "compare-drawer"
+  drawer.className = "compare-drawer hidden"
+  drawer.setAttribute("role", "dialog")
+  drawer.setAttribute("aria-modal", "true")
+  drawer.setAttribute("aria-labelledby", "compare-title")
+
+  const header = document.createElement("div")
+  header.className = "compare-header"
+  const copy = document.createElement("div")
+  const eyebrow = document.createElement("span")
+  eyebrow.textContent = "/ Compare"
+  const title = document.createElement("h2")
+  title.id = "compare-title"
+  title.textContent = "Compare Audio"
+  copy.append(eyebrow, title)
+
+  const closeButton = document.createElement("button")
+  closeButton.type = "button"
+  closeButton.className = "compare-close"
+  closeButton.textContent = "Close"
+  closeButton.addEventListener("click", closeCompareDrawer)
+  header.append(copy, closeButton)
+
+  const grid = document.createElement("div")
+  grid.id = "compare-grid"
+  grid.className = "compare-grid"
+
+  drawer.append(header, grid)
+  document.body.append(backdrop, drawer)
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && drawer.classList.contains("open")) closeCompareDrawer()
+  })
+}
+
+function openCompareDrawer(recommendationSong) {
+  const selectedSong = songs.find(song => String(song.id) === String(selectedSongId))
+  if (!selectedSong || !recommendationSong) return
+
+  ensureCompareDrawer()
+  stopAudio()
+  stopCompareAudios()
+
+  const grid = document.getElementById("compare-grid")
+  grid.innerHTML = ""
+  grid.append(
+    createComparePlayer(selectedSong, "Selected song"),
+    createComparePlayer(recommendationSong, "Recommendation")
+  )
+
+  document.body.classList.add("compare-open")
+  document.getElementById("compare-backdrop").classList.remove("hidden")
+  document.getElementById("compare-drawer").classList.remove("hidden")
+  requestAnimationFrame(() => {
+    document.getElementById("compare-backdrop").classList.add("open")
+    document.getElementById("compare-drawer").classList.add("open")
+  })
+}
+
+function closeCompareDrawer() {
+  const backdrop = document.getElementById("compare-backdrop")
+  const drawer = document.getElementById("compare-drawer")
+  if (!backdrop || !drawer) return
+
+  stopCompareAudios()
+  document.body.classList.remove("compare-open")
+  backdrop.classList.remove("open")
+  drawer.classList.remove("open")
+  window.setTimeout(() => {
+    if (!drawer.classList.contains("open")) {
+      backdrop.classList.add("hidden")
+      drawer.classList.add("hidden")
+    }
+  }, 240)
+}
+
+function stopCompareAudios() {
+  compareAudios.forEach(audio => {
+    audio.pause()
+    audio.currentTime = 0
+  })
+  compareAudios = []
+}
+
+function createComparePlayer(song, labelText) {
+  const card = document.createElement("section")
+  card.className = "compare-card"
+
+  const label = document.createElement("span")
+  label.className = "compare-label"
+  label.textContent = labelText
+
+  const title = document.createElement("h3")
+  title.textContent = song.song || "Unknown song"
+
+  const artist = document.createElement("p")
+  artist.textContent = song.artist || "Unknown artist"
+
+  const audio = new Audio(getAudioUrl(song))
+  audio.preload = "metadata"
+  compareAudios.push(audio)
+
+  let isCompareSeeking = false
+
+  const controls = document.createElement("div")
+  controls.className = "compare-controls"
+
+  const rewind = document.createElement("button")
+  rewind.type = "button"
+  rewind.className = "audio-skip-button"
+  rewind.textContent = "-15s"
+
+  const playPause = document.createElement("button")
+  playPause.type = "button"
+  playPause.className = "audio-skip-button compare-play"
+  playPause.textContent = "Play"
+
+  const forward = document.createElement("button")
+  forward.type = "button"
+  forward.className = "audio-skip-button"
+  forward.textContent = "+15s"
+
+  const speed = document.createElement("select")
+  speed.className = "audio-speed"
+  speed.setAttribute("aria-label", `Playback speed for ${song.song || "this song"}`)
+  ;["0.75", "1", "1.25", "1.5", "2"].forEach(value => {
+    const option = document.createElement("option")
+    option.value = value
+    option.textContent = `${value}x`
+    if (value === "1") option.selected = true
+    speed.appendChild(option)
+  })
+
+  controls.append(rewind, playPause, forward, speed)
+
+  const timeline = document.createElement("div")
+  timeline.className = "audio-timeline compare-timeline"
+  const currentTime = document.createElement("span")
+  currentTime.textContent = "0:00"
+  const seek = document.createElement("input")
+  seek.type = "range"
+  seek.min = "0"
+  seek.max = "0"
+  seek.step = "0.1"
+  seek.value = "0"
+  seek.setAttribute("aria-label", `Seek through ${song.song || "this song"}`)
+  const duration = document.createElement("span")
+  duration.textContent = "0:00"
+  timeline.append(currentTime, seek, duration)
+
+  const updatePlayer = () => {
+    const audioDuration = Number.isFinite(audio.duration) ? audio.duration : 0
+    seek.max = String(audioDuration)
+    if (!isCompareSeeking) seek.value = String(audio.currentTime || 0)
+    if (!isCompareSeeking) currentTime.textContent = formatTime(audio.currentTime || 0)
+    duration.textContent = formatTime(audioDuration)
+    playPause.textContent = audio.paused ? "Play" : "Pause"
+  }
+
+  const skip = seconds => {
+    const audioDuration = Number.isFinite(audio.duration) ? audio.duration : audio.currentTime + seconds
+    audio.currentTime = Math.min(Math.max((audio.currentTime || 0) + seconds, 0), audioDuration)
+    updatePlayer()
+  }
+
+  playPause.addEventListener("click", () => {
+    if (audio.paused) {
+      playPause.textContent = "Loading"
+      audio.play().catch(() => {
+        playPause.textContent = "Play"
+      })
+    } else {
+      audio.pause()
+    }
+    updatePlayer()
+  })
+  rewind.addEventListener("click", () => skip(-15))
+  forward.addEventListener("click", () => skip(15))
+  speed.addEventListener("change", () => {
+    audio.playbackRate = Number(speed.value)
+  })
+  seek.addEventListener("input", () => {
+    isCompareSeeking = true
+    currentTime.textContent = formatTime(Number(seek.value))
+  })
+  seek.addEventListener("change", () => {
+    if (Number.isFinite(Number(seek.value))) audio.currentTime = Number(seek.value)
+    isCompareSeeking = false
+    updatePlayer()
+  })
+
+  audio.addEventListener("loadedmetadata", updatePlayer)
+  audio.addEventListener("timeupdate", updatePlayer)
+  audio.addEventListener("play", updatePlayer)
+  audio.addEventListener("pause", updatePlayer)
+  audio.addEventListener("ended", updatePlayer)
+  audio.addEventListener("error", () => {
+    playPause.textContent = "Unavailable"
+    playPause.disabled = true
+  })
+  audio.load()
+
+  card.append(label, title, artist, controls, timeline)
+  return card
 }
 
 function getAudioUrl(song) {
