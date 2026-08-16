@@ -449,6 +449,106 @@ a:focus-visible {
   min-width: 178px;
 }
 
+.audio-player {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.9rem 1rem;
+  align-items: center;
+  margin-top: 1.1rem;
+  padding: 0.95rem;
+  border: 1px solid rgba(0,184,169,0.34);
+  border-radius: 2px;
+  background:
+    linear-gradient(135deg, rgba(0,184,169,0.075), rgba(255,46,166,0.055)),
+    rgba(3,4,4,0.72);
+}
+
+.audio-player.hidden {
+  display: none;
+}
+
+.audio-player-meta {
+  min-width: 0;
+}
+
+.audio-player-meta span {
+  display: block;
+  color: var(--teal);
+  font-family: "Space Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.audio-player-meta strong {
+  display: block;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  color: var(--text);
+  font-family: "Space Mono", monospace;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audio-player-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.audio-skip-button,
+.audio-speed {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text);
+  background: rgba(242,238,231,0.045);
+  font-family: "Space Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.audio-skip-button {
+  min-width: 58px;
+  padding: 0.4rem 0.58rem;
+  cursor: pointer;
+}
+
+.audio-skip-button:hover {
+  border-color: var(--magenta);
+  color: var(--magenta);
+}
+
+.audio-speed {
+  width: auto;
+  min-width: 76px;
+  padding: 0.35rem 0.45rem;
+}
+
+.audio-timeline {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  gap: 0.7rem;
+  align-items: center;
+  color: var(--muted);
+  font-family: "Space Mono", monospace;
+  font-size: 0.75rem;
+}
+
+.audio-timeline input[type="range"] {
+  width: 100%;
+  min-height: 28px;
+  padding: 0;
+  accent-color: var(--teal);
+  background: transparent;
+}
+
 .empty-state {
   grid-column: 1 / -1;
   padding: 1rem;
@@ -535,5 +635,23 @@ a:focus-visible {
 
   .recommendation-meta {
     align-items: flex-end;
+  }
+
+  .audio-player {
+    grid-template-columns: 1fr;
+  }
+
+  .audio-player-meta strong {
+    white-space: normal;
+  }
+
+  .audio-player-controls {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .audio-timeline {
+    grid-template-columns: 38px minmax(0, 1fr) 38px;
+    gap: 0.5rem;
   }
 }

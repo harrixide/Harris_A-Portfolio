@@ -32,6 +32,8 @@ let activeMethod = "cosine"
 let searchMode = "all"
 let currentAudio = null
 let currentAudioButton = null
+let currentAudioSong = null
+let isSeeking = false
 
 document.addEventListener("DOMContentLoaded", init)
 
@@ -213,6 +215,8 @@ function renderSelectedSong(song) {
   badge.className = "trajectory-badge"
   if (available && ["low", "medium", "high"].includes(level)) badge.classList.add(level)
   renderFeatureGrid(song.features || {})
+  ensureAudioPlayer()
+  updateAudioPlayer()
 }
 
 function updateTrajectoryMethod(song) {
@@ -356,32 +360,51 @@ function toggleAudio(song, button) {
     if (currentAudio.paused) {
       currentAudio.play()
       setAudioButtonState(button, "Pause", true)
+      updateAudioPlayer()
     } else {
       currentAudio.pause()
       setAudioButtonState(button, "Play", false)
+      updateAudioPlayer()
     }
     return
   }
 
   stopAudio()
   currentAudio = new Audio(audioUrl)
-  currentAudio.preload = "none"
+  currentAudio.preload = "metadata"
   currentAudioButton = button
+  currentAudioSong = song
   setAudioButtonState(button, "Loading", true)
+  updateAudioPlayer()
+  currentAudio.load()
 
-  currentAudio.addEventListener("canplay", () => setAudioButtonState(button, "Pause", true), { once: true })
+  currentAudio.addEventListener("canplay", () => {
+    setAudioButtonState(button, currentAudio.paused ? "Play" : "Pause", !currentAudio.paused)
+    updateAudioPlayer()
+  }, { once: true })
+  currentAudio.addEventListener("loadedmetadata", updateAudioPlayer)
+  currentAudio.addEventListener("timeupdate", updateAudioPlayer)
+  currentAudio.addEventListener("play", () => {
+    if (currentAudioButton) setAudioButtonState(currentAudioButton, "Pause", true)
+    updateAudioPlayer()
+  })
+  currentAudio.addEventListener("pause", () => {
+    if (currentAudioButton) setAudioButtonState(currentAudioButton, "Play", false)
+    updateAudioPlayer()
+  })
   currentAudio.addEventListener("ended", stopAudio)
   currentAudio.addEventListener("error", () => {
     setAudioButtonState(button, "Unavailable", false)
     button.disabled = true
     currentAudio = null
     currentAudioButton = null
+    currentAudioSong = null
+    updateAudioPlayer()
   })
 
   currentAudio.play().catch(() => {
     setAudioButtonState(button, "Play", false)
-    currentAudio = null
-    currentAudioButton = null
+    updateAudioPlayer()
   })
 }
 
@@ -393,11 +416,160 @@ function stopAudio() {
   if (currentAudioButton) setAudioButtonState(currentAudioButton, "Play", false)
   currentAudio = null
   currentAudioButton = null
+  currentAudioSong = null
+  updateAudioPlayer()
 }
 
 function setAudioButtonState(button, label, active) {
   button.textContent = label
   button.classList.toggle("playing", active)
+}
+
+function ensureAudioPlayer() {
+  if (document.getElementById("audio-player")) return
+
+  const selectedSongPanel = document.getElementById("selected-song")
+  const player = document.createElement("section")
+  player.id = "audio-player"
+  player.className = "audio-player hidden"
+  player.setAttribute("aria-live", "polite")
+
+  const meta = document.createElement("div")
+  meta.className = "audio-player-meta"
+  const label = document.createElement("span")
+  label.textContent = "Now playing"
+  const title = document.createElement("strong")
+  title.id = "audio-player-title"
+  title.textContent = "Nothing playing"
+  meta.append(label, title)
+
+  const controls = document.createElement("div")
+  controls.className = "audio-player-controls"
+
+  const rewind = document.createElement("button")
+  rewind.type = "button"
+  rewind.className = "audio-skip-button"
+  rewind.textContent = "-15s"
+  rewind.addEventListener("click", () => skipAudio(-15))
+
+  const playPause = document.createElement("button")
+  playPause.type = "button"
+  playPause.id = "audio-player-toggle"
+  playPause.className = "audio-skip-button"
+  playPause.textContent = "Pause"
+  playPause.addEventListener("click", toggleCurrentAudio)
+
+  const forward = document.createElement("button")
+  forward.type = "button"
+  forward.className = "audio-skip-button"
+  forward.textContent = "+15s"
+  forward.addEventListener("click", () => skipAudio(15))
+
+  const speed = document.createElement("select")
+  speed.id = "audio-speed"
+  speed.className = "audio-speed"
+  speed.setAttribute("aria-label", "Playback speed")
+  ;["0.75", "1", "1.25", "1.5", "2"].forEach(value => {
+    const option = document.createElement("option")
+    option.value = value
+    option.textContent = `${value}x`
+    if (value === "1") option.selected = true
+    speed.appendChild(option)
+  })
+  speed.addEventListener("change", () => {
+    if (currentAudio) currentAudio.playbackRate = Number(speed.value)
+  })
+
+  controls.append(rewind, playPause, forward, speed)
+
+  const timeline = document.createElement("div")
+  timeline.className = "audio-timeline"
+  const currentTime = document.createElement("span")
+  currentTime.id = "audio-current-time"
+  currentTime.textContent = "0:00"
+  const seek = document.createElement("input")
+  seek.id = "audio-seek"
+  seek.type = "range"
+  seek.min = "0"
+  seek.max = "0"
+  seek.step = "0.1"
+  seek.value = "0"
+  seek.setAttribute("aria-label", "Seek through current song")
+  seek.addEventListener("input", () => {
+    isSeeking = true
+    document.getElementById("audio-current-time").textContent = formatTime(Number(seek.value))
+  })
+  seek.addEventListener("change", () => {
+    if (currentAudio && Number.isFinite(Number(seek.value))) {
+      currentAudio.currentTime = Number(seek.value)
+    }
+    isSeeking = false
+    updateAudioPlayer()
+  })
+  const duration = document.createElement("span")
+  duration.id = "audio-duration"
+  duration.textContent = "0:00"
+  timeline.append(currentTime, seek, duration)
+
+  player.append(meta, controls, timeline)
+  selectedSongPanel.appendChild(player)
+}
+
+function updateAudioPlayer() {
+  const player = document.getElementById("audio-player")
+  if (!player) return
+
+  const hasAudio = Boolean(currentAudio && currentAudioSong)
+  player.classList.toggle("hidden", !hasAudio)
+  if (!hasAudio) return
+
+  document.getElementById("audio-player-title").textContent = currentAudioSong.artist
+    ? `${currentAudioSong.song} - ${currentAudioSong.artist}`
+    : currentAudioSong.song || "Current song"
+
+  const speed = document.getElementById("audio-speed")
+  if (speed && currentAudio) currentAudio.playbackRate = Number(speed.value)
+
+  const toggle = document.getElementById("audio-player-toggle")
+  if (toggle) toggle.textContent = currentAudio.paused ? "Play" : "Pause"
+
+  const seek = document.getElementById("audio-seek")
+  const currentTime = document.getElementById("audio-current-time")
+  const duration = document.getElementById("audio-duration")
+  const audioDuration = Number.isFinite(currentAudio.duration) ? currentAudio.duration : 0
+
+  if (seek) {
+    seek.max = String(audioDuration)
+    if (!isSeeking) seek.value = String(currentAudio.currentTime || 0)
+  }
+  if (currentTime && !isSeeking) currentTime.textContent = formatTime(currentAudio.currentTime || 0)
+  if (duration) duration.textContent = formatTime(audioDuration)
+}
+
+function toggleCurrentAudio() {
+  if (!currentAudio) return
+  if (currentAudio.paused) {
+    currentAudio.play()
+    if (currentAudioButton) setAudioButtonState(currentAudioButton, "Pause", true)
+  } else {
+    currentAudio.pause()
+    if (currentAudioButton) setAudioButtonState(currentAudioButton, "Play", false)
+  }
+  updateAudioPlayer()
+}
+
+function skipAudio(seconds) {
+  if (!currentAudio) return
+  const duration = Number.isFinite(currentAudio.duration) ? currentAudio.duration : currentAudio.currentTime + seconds
+  currentAudio.currentTime = Math.min(Math.max((currentAudio.currentTime || 0) + seconds, 0), duration)
+  updateAudioPlayer()
+}
+
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0:00"
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = Math.floor(seconds % 60).toString().padStart(2, "0")
+  return `${minutes}:${remainingSeconds}`
 }
 
 function formatNumber(value, digits) {
