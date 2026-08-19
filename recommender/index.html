@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="recommender.css">
+  <link rel="stylesheet" href="recommender.css?v=compare-ux-1">
   <style>
     .search-mode-row { display:flex; flex-wrap:wrap; gap:.65rem; margin-bottom:1.2rem; }
     .search-mode { min-height:40px; padding:.68rem .9rem; border:1px solid var(--border); border-radius:2px; color:var(--text); background:rgba(242,238,231,.04); cursor:pointer; }
@@ -63,7 +63,9 @@
   <main class="rec-container">
     <section class="intro">
       <p class="eyebrow">Interactive Project</p>
-      <h1>Unique Music Recommendations</h1>
+      <h1 class="hero-title">
+        <img class="hero-title-image" src="title-full-recommender.svg" alt="Full Recommender (No Song Audio)">
+      </h1>
       <p>Search all songs for audio-based recommendations, or browse songs with Musical Journey recommendations available.</p>
     </section>
 
@@ -95,6 +97,7 @@
         <article class="stat-card"><span>Energy</span><strong id="energy-value">Unavailable</strong></article>
         <article class="stat-card"><span>Danceability</span><strong id="danceability-value">Unavailable</strong></article>
       </div>
+      <div id="song-comparison" class="song-comparison hidden"></div>
       <details class="feature-details"><summary>View all audio features</summary><div id="feature-grid" class="feature-grid"></div></details>
     </section>
 
@@ -230,6 +233,6 @@
       <div id="recommendation-list" class="recommendation-list"></div>
     </section>
   </main>
-  <script src="recommender.js?v=full-no-audio-1"></script>
+  <script src="recommender.js?v=compare-ux-1"></script>
 </body>
 </html>

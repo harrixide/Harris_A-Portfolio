@@ -22,6 +22,19 @@ const METHOD_VISUALS = {
   }
 }
 
+const FEATURE_COMPARISON_FIELDS = [
+  { key: "tempo", label: "Tempo", digits: 1 },
+  { key: "popularity", label: "Popularity", digits: 0 },
+  { key: "energy", label: "Energy", digits: 3 },
+  { key: "danceability", label: "Danceability", digits: 3 },
+  { key: "happiness", label: "Happiness", digits: 3 },
+  { key: "acousticness", label: "Acousticness", digits: 3 },
+  { key: "instrumentalness", label: "Instrumentalness", digits: 3 },
+  { key: "liveness", label: "Liveness", digits: 3 },
+  { key: "speechiness", label: "Speechiness", digits: 3 },
+  { key: "loudness", label: "Loudness", digits: 2 }
+]
+
 let songs = []
 let recommendations = {}
 let selectedSongId = null
@@ -191,6 +204,7 @@ function selectSong(songId) {
 function renderSelectedSong(song) {
   document.getElementById("selected-song").classList.remove("hidden")
   document.getElementById("recommendation-section").classList.remove("hidden")
+  document.getElementById("song-comparison").classList.add("hidden")
   document.getElementById("selected-title").textContent = song.song || "Unknown song"
   document.getElementById("selected-artist").textContent = song.artist || "Unknown artist"
   document.getElementById("trajectory-score").textContent = formatNumber(getTrajectoryScore(song), 3)
@@ -278,33 +292,111 @@ function renderRecommendations() {
     artist.textContent = song.artist || "Unknown artist"
     const score = document.createElement("div")
     score.className = "score"
-    score.textContent = formatNumber(recommendation.score, 3)
+    score.textContent = `Match ${formatNumber(recommendation.score, 3)}`
     textWrap.append(title, artist)
     const meta = document.createElement("div")
     meta.className = "recommendation-meta"
     meta.appendChild(score)
     card.append(textWrap, meta)
 
-    const openSong = () => {
-      if (searchMode === "trajectory" && !hasTrajectoryRecommendations(song)) {
-        searchMode = "all"
-        document.querySelectorAll(".search-mode").forEach(item => item.classList.remove("active"))
-        document.querySelector('[data-search-mode="all"]').classList.add("active")
-        refreshSongSearch(false)
-      }
-      selectSong(String(song.id))
+    const compareSong = () => {
+      renderSongComparison(song, recommendation)
       document.getElementById("selected-song").scrollIntoView({ behavior: "smooth", block: "start" })
     }
 
-    card.addEventListener("click", openSong)
+    card.addEventListener("click", compareSong)
     card.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault()
-        openSong()
+        compareSong()
       }
     })
     list.appendChild(card)
   })
+}
+
+function renderSongComparison(recommendedSong, recommendation) {
+  const selectedSong = songs.find(song => String(song.id) === String(selectedSongId))
+  const comparison = document.getElementById("song-comparison")
+  if (!selectedSong || !recommendedSong || !comparison) return
+
+  comparison.innerHTML = ""
+  comparison.classList.remove("hidden")
+
+  const header = document.createElement("div")
+  header.className = "comparison-header"
+  const copy = document.createElement("div")
+  const eyebrow = document.createElement("p")
+  eyebrow.className = "eyebrow"
+  eyebrow.textContent = "Feature Compare"
+  const title = document.createElement("h3")
+  title.textContent = "Selected song vs recommendation"
+  copy.append(eyebrow, title)
+
+  header.append(copy)
+
+  const grid = document.createElement("div")
+  grid.className = "comparison-grid"
+  grid.append(
+    createComparisonCard(selectedSong, "Selected Song"),
+    createComparisonCard(recommendedSong, "Recommendation", recommendation, true)
+  )
+
+  comparison.append(header, grid)
+}
+
+function createComparisonCard(song, label, recommendation, selectable = false) {
+  const card = document.createElement("article")
+  card.className = selectable ? "comparison-card selectable" : "comparison-card"
+
+  if (selectable) {
+    card.tabIndex = 0
+    card.setAttribute("role", "button")
+    card.setAttribute("aria-label", `Select ${song.song || "this recommendation"} as the sample song`)
+    card.title = "Select this recommendation as the sample song"
+    card.addEventListener("click", () => selectSong(String(song.id)))
+    card.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault()
+        selectSong(String(song.id))
+      }
+    })
+  }
+
+  const labelEl = document.createElement("span")
+  labelEl.className = "comparison-label"
+  labelEl.textContent = label
+
+  const title = document.createElement("h4")
+  title.textContent = song.song || "Unknown song"
+
+  const artist = document.createElement("p")
+  artist.textContent = song.artist || "Unknown artist"
+
+  const list = document.createElement("div")
+  list.className = "comparison-features"
+
+  if (recommendation) {
+    list.appendChild(createComparisonRow("Match score", formatNumber(recommendation.score, 3), true))
+  }
+
+  FEATURE_COMPARISON_FIELDS.forEach(field => {
+    list.appendChild(createComparisonRow(field.label, formatNumber(song.features?.[field.key], field.digits)))
+  })
+
+  card.append(labelEl, title, artist, list)
+  return card
+}
+
+function createComparisonRow(label, value, emphasized = false) {
+  const row = document.createElement("div")
+  row.className = emphasized ? "comparison-feature emphasized" : "comparison-feature"
+  const labelEl = document.createElement("span")
+  labelEl.textContent = label
+  const valueEl = document.createElement("strong")
+  valueEl.textContent = value
+  row.append(labelEl, valueEl)
+  return row
 }
 
 function formatNumber(value, digits) {
