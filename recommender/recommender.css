@@ -128,6 +128,10 @@ main {
   display: block;
   width: 100%;
   height: auto;
+  opacity: 0.96;
+  filter: drop-shadow(0 0 28px rgba(0,184,169,0.22)) drop-shadow(0 0 24px rgba(255,46,166,0.14));
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 94%, transparent 100%);
 }
 
 .intro p:last-child {

@@ -17,10 +17,21 @@
     <pattern id="dotField" width="20" height="20" patternUnits="userSpaceOnUse">
       <circle cx="2" cy="2" r="1.2" fill="#f2eee7" fill-opacity="0.14"/>
     </pattern>
+    <radialGradient id="ambientAudioTeal" cx="66%" cy="42%" r="54%">
+      <stop offset="0" stop-color="#00b8a9" stop-opacity="0.32"/>
+      <stop offset="0.5" stop-color="#00b8a9" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#00b8a9" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ambientAudioRed" cx="80%" cy="66%" r="44%">
+      <stop offset="0" stop-color="#ff3b30" stop-opacity="0.22"/>
+      <stop offset="0.56" stop-color="#ff3b30" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#ff3b30" stop-opacity="0"/>
+    </radialGradient>
   </defs>
 
-  <rect width="840" height="190" fill="#030404"/>
-  <rect x="0" y="0" width="840" height="190" fill="url(#dotField)" opacity="0.5"/>
+  <rect width="840" height="190" fill="url(#ambientAudioTeal)"/>
+  <rect width="840" height="190" fill="url(#ambientAudioRed)"/>
+  <rect x="0" y="0" width="840" height="190" fill="url(#dotField)" opacity="0.24"/>
 
   <g transform="translate(552 30)" fill="none" stroke-linecap="round">
     <path d="M0 62 C18 18, 46 18, 64 62 S110 106, 128 62 S174 18, 192 62" stroke="#00b8a9" stroke-opacity="0.55" stroke-width="2.2"/>
@@ -40,7 +51,7 @@
   <path d="M36 43H96" stroke="#00b8a9" stroke-width="5"/>
   <path d="M100 43H802" stroke="#f2eee7" stroke-opacity="0.18" stroke-width="1"/>
 
-  <text x="34" y="88" fill="#f2eee7" font-family="Courier" font-size="47" font-weight="700" letter-spacing="0">Smaller Recommender</text>
+  <text x="34" y="88" fill="#f2eee7" font-family="Courier" font-size="47" font-weight="700" letter-spacing="0" filter="url(#pulseGlow)">Smaller Recommender</text>
   <text x="38" y="123" fill="#00b8a9" font-family="Courier" font-size="19" font-weight="700" letter-spacing="0">WITH SONG AUDIO</text>
   <text x="602" y="142" fill="#ff3b30" font-family="Courier" font-size="13" font-weight="700" letter-spacing="0" filter="url(#pulseGlow)">PLAYABLE SUBSET</text>
   <text x="38" y="169" fill="#f2eee7" fill-opacity="0.58" font-family="Courier" font-size="12" font-weight="400" letter-spacing="0">compare tracks / seek / speed / listen side by side</text>

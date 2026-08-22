@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="recommender.css?v=compare-ux-1">
+  <link rel="stylesheet" href="recommender.css?v=hero-blend-1">
   <style>
     .search-mode-row { display:flex; flex-wrap:wrap; gap:.65rem; margin-bottom:1.2rem; }
     .search-mode { min-height:40px; padding:.68rem .9rem; border:1px solid var(--border); border-radius:2px; color:var(--text); background:rgba(242,238,231,.04); cursor:pointer; }
@@ -64,7 +64,7 @@
     <section class="intro">
       <p class="eyebrow">Audio-Ready Project</p>
       <h1 class="hero-title">
-        <img class="hero-title-image" src="title-audio-recommender.svg" alt="Smaller Recommender with Song Audio">
+        <img class="hero-title-image" src="title-audio-recommender.svg?v=hero-blend-1" alt="Smaller Recommender with Song Audio">
       </h1>
       <p>Search the smaller catalog where every selected song and recommendation has a matching audio file ready to connect.</p>
     </section>
@@ -135,7 +135,7 @@
           <div id="unique-graphic" class="method-graphic svg-explainer">
             <svg viewBox="0 0 760 500" role="img" aria-labelledby="uniqueSvgTitle uniqueSvgDesc">
               <title id="uniqueSvgTitle">Familiar with a Twist recommendation example</title>
-              <desc id="uniqueSvgDesc">A one-quadrant scatter plot of all songs. Ten equal red circles form a local cluster of the most similar sounding songs. A dashed yellow arrow points to the red point furthest toward the top right.</desc>
+              <desc id="uniqueSvgDesc">A scatter plot of songs projected into uniqueness space. Red circles represent the 50 songs that sound most similar structurally to the selected song. A dashed yellow arrow points to the song furthest from the origin.</desc>
               <defs>
                 <marker id="uniqueArrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#fbbf24"/></marker>
                 <filter id="redGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -148,6 +148,8 @@
               <g transform="translate(82,92)">
                 <line x1="0" y1="270" x2="520" y2="270" class="svg-axis"/>
                 <line x1="0" y1="270" x2="0" y2="0" class="svg-axis"/>
+                <circle cx="0" cy="270" r="5" fill="#f8fafc"/>
+                <text x="12" y="264" class="svg-small">Origin</text>
                 <g class="svg-grid">
                   <line x1="0" y1="216" x2="520" y2="216"/><line x1="0" y1="162" x2="520" y2="162"/><line x1="0" y1="108" x2="520" y2="108"/><line x1="0" y1="54" x2="520" y2="54"/>
                   <line x1="104" y1="0" x2="104" y2="270"/><line x1="208" y1="0" x2="208" y2="270"/><line x1="312" y1="0" x2="312" y2="270"/><line x1="416" y1="0" x2="416" y2="270"/>
@@ -161,19 +163,20 @@
                 </g>
                 <path d="M505 50 C478 66 452 91 426 125" fill="none" stroke="#fbbf24" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#uniqueArrow)" filter="url(#yellowGlow)"/>
                 <text x="342" y="30" fill="#fbbf24" style="font:700 15px Inter,sans-serif">Recommended song</text>
-                <text x="342" y="48" class="svg-small">Furthest along both axes among</text>
-                <text x="342" y="63" class="svg-small">the 10 most similar sounding songs</text>
-                <text x="430" y="298" class="svg-small">More unique on X axis →</text>
-                <text x="-205" y="-22" class="svg-small" transform="rotate(-90)">More unique on Y axis →</text>
+                <text x="342" y="48" class="svg-small">Furthest from the origin among</text>
+                <text x="342" y="63" class="svg-small">similar candidates in audio-feature space</text>
+                <text x="430" y="298" class="svg-small">Asymmetry dimension X →</text>
+                <text x="-205" y="-22" class="svg-small" transform="rotate(-90)">Asymmetry dimension Y →</text>
               </g>
 
               <g transform="translate(82,390)">
                 <circle cx="0" cy="0" r="6" fill="#6b7280"/><text x="14" y="4" class="svg-small">All songs</text>
-                <circle cx="130" cy="0" r="7" fill="#ef4444"/><text x="145" y="4" class="svg-small">10 most similar sounding songs</text>
+                <circle cx="130" cy="0" r="7" fill="#ef4444"/><text x="145" y="4" class="svg-small">similar audio candidates</text>
               </g>
-              <text x="82" y="432" class="svg-subtitle">Gray points represent all songs. Red points represent the 10 songs that sound most similar.</text>
-              <text x="82" y="453" class="svg-subtitle">The recommendation is the red song furthest along both axes within that local cluster.</text>
-              <text x="82" y="474" fill="#f8fafc" style="font:700 13px Inter,sans-serif">This gives you a familiar song with a unique twist.</text>
+              <text x="82" y="420" class="svg-subtitle">Gray points represent all songs. Red points represent the 50 songs that sound</text>
+              <text x="82" y="440" class="svg-subtitle">most similar structurally to the selected song. We place those songs in</text>
+              <text x="82" y="460" class="svg-subtitle">uniqueness space (Statistical Technique: Projection Pursuit), then choose</text>
+              <text x="82" y="480" fill="#f8fafc" style="font:700 13px Inter,sans-serif">the song that is furthest from the origin.</text>
             </svg>
           </div>
 
@@ -235,6 +238,6 @@
     </section>
   </main>
   <script src="audio-config.js?v=audio-player-1"></script>
-  <script src="recommender.js?v=compare-ux-1"></script>
+  <script src="recommender.js?v=origin-copy-2"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 const METHOD_DESCRIPTIONS = {
   cosine: "Find the songs that sound the most similar based on their audio characteristics. This method compares features such as tempo, energy, danceability, acousticness, and more to recommend the closest overall matches.",
-  unique: "We first find the songs that are most musically similar, then recommend the one that stands out the most within that group to give you something familiar with a twist.",
+  unique: "Gray points represent all songs. Check the image for more details.",
   trajectory: "Songs whose musical journey changes most similarly over time. We split each song into 30-second segments, analyze each segment individually, and recommend songs that evolve in the most similar way from beginning to end."
 }
 
@@ -12,7 +12,7 @@ const METHOD_VISUALS = {
   },
   unique: {
     title: "Finding a Similar Song That Stands Out",
-    caption: "Example: gray points represent all songs, while the 10 equal red points represent the most similar sounding songs. The recommendation is the red song furthest along both uniqueness axes.",
+    caption: "Example: gray points represent songs projected into asymmetry space. Red points are musically similar candidates. The recommendation is the similar candidate with the highest distance from the origin of that space.",
     graphicId: "unique-graphic"
   },
   trajectory: {
