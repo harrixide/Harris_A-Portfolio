@@ -963,3 +963,8 @@ body.compare-open {
     width: 100%;
   }
 }
+
+/* Preserve paragraph breaks in the method explanation. */
+#method-visual-caption {
+  white-space: pre-line;
+}
