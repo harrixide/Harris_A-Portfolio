@@ -12,7 +12,7 @@ const METHOD_VISUALS = {
   },
   unique: {
     title: "Finding a Similar Song That Stands Out",
-    caption: "We project song data into a 3D space (shown in 2D for visual clarity) to help find unique songs. These aren’t ordinary spatial coordinates—they’re calculated using an asymmetry technique called projection pursuit. This places points further from the origin, the more uncommon their song metrics (danceability, acousticness, etc.). The points in red are songs we’ve identified as similar using cosine similarity prior to the visualization.\n\nBy choosing the red point furthest from the origin, we have found a way to recommend a song that is structurally similar but also the most unique among the red points.",
+    caption: "We project song data into a 3D space (shown in 2D for visual clarity) to help find unique songs. These aren’t ordinary spatial coordinates. They’re calculated using an asymmetry technique called projection pursuit. This places points further from the origin, the more uncommon their song metrics (danceability, acousticness, etc.). The points in red are songs we’ve identified as similar using cosine similarity prior to the visualization.\n\nBy choosing the red point furthest from the origin, we have found a way to recommend a song that is structurally similar but also the most unique among the red points.",
     graphicId: "unique-graphic"
   },
   trajectory: {
